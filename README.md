@@ -1,6 +1,7 @@
 # Intelligent Patient Health Risk Predictor
 <img width="1421" height="777" alt="Screenshot 2026-06-07 at 10 51 00 PM" src="https://github.com/user-attachments/assets/e7188beb-548e-45dd-803a-a95c1c527c88" />
 <img width="1408" height="778" alt="Screenshot 2026-06-07 at 10 50 43 PM" src="https://github.com/user-attachments/assets/ac2a3100-45d3-4a16-a15d-4e0eda580b04" />
+<img width="1406" height="775" alt="Screenshot 2026-06-07 at 10 52 50 PM" src="https://github.com/user-attachments/assets/ec739ea4-a613-4755-9877-dc5f8ab60f12" />
 
 
 ## 🎯 Vision
