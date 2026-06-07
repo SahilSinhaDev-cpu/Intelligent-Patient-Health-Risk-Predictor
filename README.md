@@ -1,6 +1,7 @@
 # Intelligent Patient Health Risk Predictor
+<img width="1421" height="777" alt="Screenshot 2026-06-07 at 10 51 00 PM" src="https://github.com/user-attachments/assets/e7188beb-548e-45dd-803a-a95c1c527c88" />
+<img width="1408" height="778" alt="Screenshot 2026-06-07 at 10 50 43 PM" src="https://github.com/user-attachments/assets/ac2a3100-45d3-4a16-a15d-4e0eda580b04" />
 
-![Dashboard Mockup](/Users/sahilkumarsinha/.gemini/antigravity-ide/brain/7d41080f-af09-4990-8205-b3423840160e/dashboard_mockup_1780851838271.png)
 
 ## 🎯 Vision
 A cutting‑edge AI‑powered web application that predicts breast cancer risk (or similar health concerns) from clinical measurements, alerts physicians via **Twilio SMS**, and delivers **PDF clinical summaries**. Designed for clinicians who need fast, reliable, and actionable risk insights.
