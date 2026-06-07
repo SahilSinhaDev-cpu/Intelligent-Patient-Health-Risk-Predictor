@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "**/templates/**/*.jinja2": "jinja"
+    },
+    "emmet.includeLanguages": {
+        "jinja": "html"
+    }
+}

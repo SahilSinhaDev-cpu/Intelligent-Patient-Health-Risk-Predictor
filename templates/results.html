@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Results | Intelligent Patient Health Risk Predictor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .high-risk-row {
+        background-color: var(--high-risk-bg) !important;
+        border-left: 4px solid var(--high-risk-red);
+    }
+    
+    .high-risk-badge {
+        background: var(--high-risk-red);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .high-risk-icon {
+        color: var(--high-risk-red);
+        font-size: 1.5rem;
+        animation: pulse 1.5s infinite;
+    }
+    
+    .low-risk-row {
+        background-color: var(--low-risk-bg) !important;
+        border-left: 4px solid var(--low-risk-green);
+    }
+    
+    .low-risk-badge {
+        background: var(--low-risk-green);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .low-risk-icon {
+        color: var(--low-risk-green);
+        font-size: 1.5rem;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .table thead th {
+        background: #f1f5f9;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .sms-status {
+        font-size: 0.8rem;
+        font-family: monospace;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #004494 100%);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-table me-2 text-primary"></i>
+                        Detailed Prediction Results
+                    </div>
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if predictions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Patient Name</th>
+                                        <th>Risk Level</th>
+                                        <th>Confidence Score</th>
+                                        <th>Visual Alert</th>
+                                        <th>SMS Notification</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pred in predictions %}
+                                        <tr class="{{ 'high-risk-row' if pred.is_high_risk else 'low-risk-row' }}">
+                                            <td class="text-muted">{{ pred.timestamp }}</td>
+                                            <td class="fw-semibold">{{ pred.patient_name }}</td>
+                                            <td>
+                                                <span class="{{ 'high-risk-badge' if pred.is_high_risk else 'low-risk-badge' }}">
+                                                    <i class="bi bi-{{ 'exclamation-triangle' if pred.is_high_risk else 'check-circle' }} me-1"></i>
+                                                    {{ pred.risk_label }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 8px; width: 100px;">
+                                                        <div class="progress-bar {{ 'bg-danger' if pred.is_high_risk else 'bg-success' }}" 
+                                                             style="width: {{ pred.risk_score }}%"></div>
+                                                    </div>
+                                                    <small class="fw-semibold">{{ pred.risk_score }}%</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if pred.is_high_risk %}
+                                                    <i class="bi bi-exclamation-octagon-fill high-risk-icon" title="High Risk Alert Triggered"></i>
+                                                {% else %}
+                                                    <i class="bi bi-shield-check low-risk-icon" title="Low Risk - No Action Needed"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if pred.sms_status %}
+                                                    {% if pred.sms_status.startswith('SMS_FAILED') %}
+                                                        <span class="text-danger sms-status">
+                                                            <i class="bi bi-x-circle me-1"></i>Failed
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-success sms-status">
+                                                            <i class="bi bi-check-circle me-1"></i>Sent
+                                                        </span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted sms-status">—</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="alert('Full patient report feature coming soon')">
+                                                    <i class="bi bi-file-earmark-text me-1"></i>View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-clipboard-data"></i>
+                            <h5>No Results Available</h5>
+                            <p>Run a prediction from the dashboard to see detailed results here.</p>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-2">
+                                <i class="bi bi-arrow-left me-1"></i>Go to Dashboard
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    {% if predictions %}
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <h6 class="opacity-75">Total Assessments</h6>
+                    <h3>{{ predictions|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="background: var(--high-risk-red); color: white;">
+                <div class="card-body">
+                    <h6 class="opacity-75">High Risk Cases</h6>
+                    <h3>{{ predictions|selectattr('is_high_risk', 'equalto', true)|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="background: var(--low-risk-green); color: white;">
+                <div class="card-body">
+                    <h6 class="opacity-75">Low Risk Cases</h6>
+                    <h3>{{ predictions|selectattr('is_high_risk', 'equalto', false)|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

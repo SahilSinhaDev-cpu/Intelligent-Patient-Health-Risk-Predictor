@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Intelligent Patient Health Risk Predictor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.625rem 0.875rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 0.2rem rgba(0,86,179,0.1);
+    }
+    
+    .btn-predict {
+        background: var(--primary-blue);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+    }
+    
+    .btn-predict:hover {
+        background: #004494;
+    }
+    
+    .btn-logout {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    /* High Risk Styling */
+    .high-risk-row {
+        background-color: var(--high-risk-bg) !important;
+        border-left: 4px solid var(--high-risk-red);
+    }
+    
+    .high-risk-badge {
+        background: var(--high-risk-red);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .high-risk-icon {
+        color: var(--high-risk-red);
+        font-size: 1.5rem;
+        animation: pulse 1.5s infinite;
+    }
+    
+    /* Low Risk Styling */
+    .low-risk-row {
+        background-color: var(--low-risk-bg) !important;
+        border-left: 4px solid var(--low-risk-green);
+    }
+    
+    .low-risk-badge {
+        background: var(--low-risk-green);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .low-risk-icon {
+        color: var(--low-risk-green);
+        font-size: 1.5rem;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    .feature-input-group {
+        margin-bottom: 1rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #004494 100%);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .table thead th {
+        background: #f1f5f9;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .sms-status {
+        font-size: 0.8rem;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+        <div class="row g-4">
+            <!-- Left Column: Input Form -->
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-clipboard-pulse me-2 text-primary"></i>
+                        Patient Data Entry
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{{ url_for('predict') }}">
+                            <div class="mb-3">
+                                <label class="form-label">Patient Name</label>
+                                <input type="text" name="patient_name" class="form-control" placeholder="e.g. John Doe" required>
+                            </div>
+                            
+                            <hr class="my-4">
+                            <h6 class="text-muted mb-3"><i class="bi bi-sliders me-1"></i> Clinical Measurements</h6>
+                            
+                            <!-- Feature inputs generated dynamically from model -->
+                            <div class="row">
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Radius</label>
+                                    <input type="number" step="any" name="mean radius" class="form-control" placeholder="e.g. 17.99" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Texture</label>
+                                    <input type="number" step="any" name="mean texture" class="form-control" placeholder="e.g. 10.38" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Perimeter</label>
+                                    <input type="number" step="any" name="mean perimeter" class="form-control" placeholder="e.g. 122.8" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Area</label>
+                                    <input type="number" step="any" name="mean area" class="form-control" placeholder="e.g. 1001" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Smoothness</label>
+                                    <input type="number" step="any" name="mean smoothness" class="form-control" placeholder="e.g. 0.1184" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Compactness</label>
+                                    <input type="number" step="any" name="mean compactness" class="form-control" placeholder="e.g. 0.2776" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Concavity</label>
+                                    <input type="number" step="any" name="mean concavity" class="form-control" placeholder="e.g. 0.3001" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Concave Points</label>
+                                    <input type="number" step="any" name="mean concave points" class="form-control" placeholder="e.g. 0.1471" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Symmetry</label>
+                                    <input type="number" step="any" name="mean symmetry" class="form-control" placeholder="e.g. 0.2419" required>
+                                </div>
+                                <div class="col-md-6 feature-input-group">
+                                    <label class="form-label">Mean Fractal Dimension</label>
+                                    <input type="number" step="any" name="mean fractal dimension" class="form-control" placeholder="e.g. 0.07871" required>
+                                </div>
+                            </div>
+                            
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-predict btn-primary">
+                                    <i class="bi bi-cpu me-2"></i>Run AI Risk Assessment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="bi bi-table me-2 text-primary"></i>
+                            Prediction Results
+                        </div>
+                        <span class="badge bg-secondary">{{ predictions|length }} Assessment(s)</span>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if predictions %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Patient</th>
+                                            <th>Risk Level</th>
+                                            <th>Confidence</th>
+                                            <th>Alert</th>
+                                            <th>SMS Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for pred in predictions %}
+                                            <tr class="{{ 'high-risk-row' if pred.is_high_risk else 'low-risk-row' }}">
+                                                <td class="text-muted">{{ pred.timestamp }}</td>
+                                                <td class="fw-semibold">{{ pred.patient_name }}</td>
+                                                <td>
+                                                    <span class="{{ 'high-risk-badge' if pred.is_high_risk else 'low-risk-badge' }}">
+                                                        <i class="bi bi-{{ 'exclamation-triangle' if pred.is_high_risk else 'check-circle' }} me-1"></i>
+                                                        {{ pred.risk_label }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                            <div class="progress-bar {{ 'bg-danger' if pred.is_high_risk else 'bg-success' }}" 
+                                                                 style="width: {{ pred.risk_score }}%"></div>
+                                                        </div>
+                                                        <small class="fw-semibold">{{ pred.risk_score }}%</small>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if pred.is_high_risk %}
+                                                        <i class="bi bi-exclamation-octagon-fill high-risk-icon" title="High Risk Alert Triggered"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-shield-check low-risk-icon" title="Low Risk - No Action Needed"></i>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if pred.sms_status %}
+                                                        {% if pred.sms_status.startswith('SMS_FAILED') %}
+                                                            <span class="text-danger sms-status"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                                                        {% else %}
+                                                            <span class="text-success sms-status"><i class="bi bi-check-circle me-1"></i>Sent</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted sms-status">—</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-clipboard-data"></i>
+                                <h5>No Assessments Yet</h5>
+                                <p>Enter patient data on the left and click "Run AI Risk Assessment" to see results here.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick Stats Card -->
+                {% if predictions %}
+                <div class="card mt-4 stats-card">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="mb-1">Latest Assessment</h6>
+                            <p class="mb-0 opacity-75">{{ predictions[-1].patient_name }} — {{ predictions[-1].risk_label }}</p>
+                        </div>
+                        <i class="bi bi-activity fs-1 opacity-50"></i>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+</div>
+{% endblock %}
